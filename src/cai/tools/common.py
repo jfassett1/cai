@@ -532,15 +532,18 @@ def _run_ssh(command, stdout=False, timeout=100, workspace_dir=None, stream=Fals
     ssh_user = os.environ.get('SSH_USER')
     ssh_host = os.environ.get('SSH_HOST')
     ssh_pass = os.environ.get('SSH_PASS') 
+    ssh_port = os.environ.get('SSH_PORT', '22')
+
     remote_command = command
     original_cmd_for_msg = command
     context_msg = f"({ssh_user}@{ssh_host})"
 
     # Construct base SSH command list
     if ssh_pass:
-        ssh_cmd_list = ["sshpass", "-p", ssh_pass, "ssh", f"{ssh_user}@{ssh_host}"] # noqa E501
+        ssh_cmd_list = ["sshpass", "-p", ssh_pass, "ssh", "-p", ssh_port, f"{ssh_user}@{ssh_host}"]
+
     else:
-        ssh_cmd_list = ["ssh", f"{ssh_user}@{ssh_host}"]
+        ssh_cmd_list = ["ssh", "-p", ssh_port, f"{ssh_user}@{ssh_host}"]
     ssh_cmd_list.append(remote_command)
 
     try:
@@ -1429,6 +1432,7 @@ async def run_command_async(command, ctf=None, stdout=False,  # pylint: disable=
     
     # For SSH, delegate to sync version for now
     if is_ssh_env:
+        print("flag ssh")
         import asyncio
         import functools
         
